@@ -3,7 +3,7 @@
 
 %% Preliminary disturbance study
 % This script provides an interface to study attitude and orbital
-% disturbances for the CosmoSat-1 mission. 
+% disturbances for the CosmosSat-1 mission. 
 
 % Orbits in consideration are sun-synchronous from 300 km to 800 km.
 % Circular orbits are first assume as only altitude is interesting for
@@ -11,6 +11,8 @@
 % worst-case and best-case, ranging in the orbit altitude range proposed.
 
 % All units are in S.I.
+
+% Github: https://github.com/cosmos-urjc/COSMOSSAT-1.git
 
 %% General setup 
 options = odeset('RelTol', 2.25e-14, 'AbsTol', 1e-22);      %Integration tolerances
@@ -28,9 +30,10 @@ max_area = [];          %Maximum exposed area
 mag_moment = ;          %Residual magnetic moment of the spacecraft
 
 % Orbit characteristics 
-hmax = 800e3;           %Maximum orbit altitude
-dh = 1;                 %Altitude step
-h = Re:dt:(Re+hmax);    %Orbital altitude range    
+hmin = 250e3;                  %Minimum orbit altitude
+hmax = 800e3;                  %Maximum orbit altitude
+dh = 1;                        %Altitude step
+h = (Re+hmin):dt:(Re+hmax);    %Orbital altitude range    
 
 % Earth magnetic field characteristics
 
@@ -43,5 +46,8 @@ dt = 1;                 %Time step (s)
 tspan = 0:dt:tmax;      %Integration span (s)
 
 %% Orbital and attitude disturbances computation
+% Orbit study
+
+% Attitude study
 
 %% Results
