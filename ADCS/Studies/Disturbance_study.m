@@ -1,9 +1,9 @@
-%% CosmosSat-1 ADCS Team %% 
+%% COSMOSAT-1 ADCS Team %% 
 % 23/02/21
 
 %% Preliminary disturbance study
 % This script provides an interface to study attitude and orbital
-% disturbances for the CosmosSat-1 mission. 
+% disturbances for the COSMOSAT-1 mission. 
 
 % Orbits in consideration are sun-synchronous from 300 km to 800 km.
 % Circular orbits are first assume as only altitude is interesting for
@@ -12,7 +12,7 @@
 
 % All units are in S.I.
 
-% Github: https://github.com/cosmos-urjc/COSMOSSAT-1.git
+% Github: https://github.com/cosmos-urjc/COSMOSAT-1.git
 
 %% General setup 
 options = odeset('RelTol', 2.25e-14, 'AbsTol', 1e-22);      %Integration tolerances
