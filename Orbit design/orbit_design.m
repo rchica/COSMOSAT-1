@@ -17,8 +17,16 @@
 mu = 3.986e14;                                  %Earth gravitational parameter
 J2 = 1.08263e-3;                                %Second zonal harmonic of the Earth
 a_e = 6378.14e3;                                %Mean Earth radius
-tau = (3600*24)*(365.242199/(1+365.242199));    %Sidereal day
-Earth_Omega = (pi/180)*(360)/tau;               %Mean sidereal motion of the Earth
+SolarYear = 365.242199;                         %Solar year
+tau = (3600*24)*(SolarYear/(1+SolarYear));      %Sidereal day
+Earth_Omega = (360)/(3600*24);                  %Mean sidereal motion of the Earth
+Sun_Omega = 360/tau;                            %Earth rate relative to vernal equinox
+
+%Time relationships 
+vernalTime = datetime(2022,3,20,0,37,0,0);      %Day of the vernal equinox
+launchTime = datetime(2022,7,7,12,0,0,0);       %Launch day
+vernalTime = datenum(vernalTime);               %Day of the vernal equinox
+time = datenum(launchTime);                     %Launch day
 
 %Sun requirements 
 delta = deg2rad(2);                             %Solar declination
@@ -26,12 +34,12 @@ eps = 0;                                        %Equation of time
 
 %Orbit requirements 
 rep_days = 1;                                   %Days between identical groundtracks
-rev_day = 14;                                   %Needed revolutions per day
+rev_day = 15;                                   %Needed revolutions per day
 LTANd = 12;                                     %Mean Local Time of the Ascending Node
 
 %% Altitude selection
 P = 86400/rev_day;                              %Nodal period
-a_d = (mu*(P/2*pi)^2)^(1/3);                    %Desired orbital altitude 
+a_d = (sqrt(mu)*P/(2*pi))^(2/3);                %Desired orbital altitude 
 
 %% Inclination selection
 %General inclination evaluation
@@ -39,21 +47,28 @@ dOmega = Earth_Omega;                           %Orbital precession rate
 dh = 100;                                       %Altitude step
 a_max = 1000e3;                                 %Orbital altitude (circular orbit) over the geoid
 a = a_e:dh:a_e+a_max;                           %Orbital altitude
-n = sqrt(mu./a.^3);                             %Mean orbital motion
-p = a;                                          %Semilatus rectum of a circular orbit
-i = acos(dOmega./(-(2/3)*J2*n.*(a_e./p).^2));   %Inclination relationship with the orbital altitude
+e = 0;                                          %Orbital eccentricity
+omega = pi/2;                                   %Argument of perigee for frozen orbits
 
-%Specific orbit determination
-n_d = sqrt(mu/a_d^3);                           %Desired mean orbital motio
-p_d = a_d;                                      %Desired semilatus rectum of a circular orbit
-i_d = acos(dOmega/(-(2/3)*J2*n_d*(a_e/p_d)^2)); %Desired inclination
+%Inclination relationship with the orbital altitude
+n = sqrt(mu./a.^3);                             %Orbital mean motion
+p = a*(1-e^2);                                  %Semilatus rectum of the orbit
+i = acos((-2*dOmega*p.^2)./(3*J2*a_e^2.*n));    %Inclination 
+
+%Desired inclination
+n_d = sqrt(mu/a_d^3);                           %Orbital mean motion
+p_d = a_d*(1-e^2);                              %Semilatus rectum of the orbit
+i_d = acos((-2*dOmega*p_d^2)/(3*J2*a_e^2*n_d)); %Desired inclination
+
+%% RAAN selection
+RAAN_d = mod((360/24)*(LTANd-180+(Sun_Omega)*(time-vernalTime)),360);
 
 %% Fundamental interval 
 dL = 360*(rep_days/rev_day);                    %Earth angle between adcent groundtracks
 
 %% Solar angle 
 s = [cos(delta)*cos(eps); cos(delta)*cos(eps); sin(delta)];     %Sun vector 
-h = [sin(i)*sin(MOmega); -sin(i)*cos(MOmega); cos(i)];          %Angular momentum vector 
+h = [sin(i_d)*sin(RAAN_d); -sin(i_d)*cos(RAAN_d); cos(RAAN_d)]; %Angular momentum vector 
 beta = asin(dot(h, s));                                         %Solar angle 
 
 %% Shadow time 
@@ -62,13 +77,12 @@ nu = 2*acos(cos(eta)/cos(beta));
 dTimeShadow = nu/360*P;                                         %Spent time in shadow
 
 %% Results
-fprintf("LTAN: %.f \n", LTANd);
-fprintf("Orbital altitude: %.f km \n", a_d/10^3);
-fprintf("Orbital inclination: %.f \n", i_d);
-fprintf("RAAN: %.f \n", RAAN);
-fprintf("Time in shadow: %.f h\n", dTimeShadow/3600);
+fprintf("LTAN: %.4f h \n", LTANd);
+fprintf("Orbital altitude: %.4f km \n", (a_d-a_e)/10^3);
+fprintf("Orbital inclination: %.4f \n", i_d);
+fprintf("RAAN: %.4f deg \n", RAAN_d);
+fprintf("Time in shadow: %.4f h\n", dTimeShadow/3600);
 
-%%
 figure(1) 
 hold on
 plot(a/1000, rad2deg(i), 'b');
