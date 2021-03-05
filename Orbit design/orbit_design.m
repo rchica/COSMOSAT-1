@@ -19,16 +19,16 @@ J2 = 1.08263e-3;                                %Second zonal harmonic of the Ea
 a_e = 6378.14e3;                                %Mean Earth radius
 SolarYear = 365.242199;                         %Solar year
 tau = (3600*24)*(SolarYear/(1+SolarYear));      %Sidereal day
-Earth_Omega = (360)/(3600*24);                  %Mean sidereal motion of the Earth
-Sun_Omega = 360/tau;                            %Earth rate relative to vernal equinox
-
+Earth_Omega = (2*pi/SolarYear)/(3600*24);       %Earth Mean motion
+Sun_Omega = (2*pi)/tau;                         %Earth rate relative to vernal equinox
+ 
 %Time relationships 
 vernalTime = datetime(2022,3,20,0,37,0,0);      %Day of the vernal equinox
 launchTime = datetime(2022,7,7,12,0,0,0);       %Launch day
 vernalTime = datenum(vernalTime);               %Day of the vernal equinox
 time = datenum(launchTime);                     %Launch day
 
-%Sun requirements 
+%Sun requirements (this must change as a function of the launch date. See Sun's analemma)
 delta = deg2rad(2);                             %Solar declination
 eps = 0;                                        %Equation of time
 
@@ -61,27 +61,27 @@ p_d = a_d*(1-e^2);                              %Semilatus rectum of the orbit
 i_d = acos((-2*dOmega*p_d^2)/(3*J2*a_e^2*n_d)); %Desired inclination
 
 %% RAAN selection
-RAAN_d = mod((360/24)*(LTANd-180+(Sun_Omega)*(time-vernalTime)),360);
+RAAN_d = mod((360/24)*(LTANd-180+(Sun_Omega)*(time-vernalTime)*(3600*24)),360);
 
 %% Fundamental interval 
 dL = 360*(rep_days/rev_day);                    %Earth angle between adcent groundtracks
 
 %% Solar angle 
-s = [cos(delta)*cos(eps); cos(delta)*cos(eps); sin(delta)];     %Sun vector 
-h = [sin(i_d)*sin(RAAN_d); -sin(i_d)*cos(RAAN_d); cos(RAAN_d)]; %Angular momentum vector 
-beta = asin(dot(h, s));                                         %Solar angle 
+s = [cos(delta)*cos(eps); cos(delta)*sin(eps); sin(delta)];     %Sun vector 
+h = [sin(i_d)*sin(RAAN_d); -sin(i_d)*cos(RAAN_d); cos(i_d)];    %Angular momentum vector 
+beta = asin(dot(h,s));                                          %Solar angle 
 
 %% Shadow time 
 eta = asin(a_e/a_d);                        
 nu = 2*acos(cos(eta)/cos(beta));            
-dTimeShadow = nu/360*P;                                         %Spent time in shadow
+dTimeShadow = rad2deg(nu)/360*P;                                         %Spent time in shadow
 
 %% Results
 fprintf("LTAN: %.4f h \n", LTANd);
 fprintf("Orbital altitude: %.4f km \n", (a_d-a_e)/10^3);
-fprintf("Orbital inclination: %.4f \n", i_d);
+fprintf("Orbital inclination: %.4f \n", rad2deg(i_d));
 fprintf("RAAN: %.4f deg \n", RAAN_d);
-fprintf("Time in shadow: %.4f h\n", dTimeShadow/3600);
+fprintf("Time in shadow: %.4f min \n", dTimeShadow/60);
 
 figure(1) 
 hold on
