@@ -60,6 +60,17 @@ n_d = sqrt(mu/a_d^3);                           %Orbital mean motion
 p_d = a_d*(1-e^2);                              %Semilatus rectum of the orbit
 i_d = acos((-2*dOmega*p_d^2)/(3*J2*a_e^2*n_d)); %Desired inclination
 
+%Perturbed desired inclination
+tol = 1e-10;
+error = 1;
+while (error >= tol)
+    %J2 perturbed mean motion
+    n_p  = n_d*(1+(3/2)*J2*(a_e/a_d)^2*sqrt(1-e^2)*(1-(3/2)*sin(i_d)^2));
+    i_p = acos((-2*dOmega*p_d^2)/(3*J2*a_e^2*n_p));
+    error = abs(i_p-i_d);
+    i_d = i_p;
+end
+
 %% RAAN selection
 RAAN_d = mod((360/24)*(LTANd-180+(Sun_Omega)*(time-vernalTime)*(3600*24)),360);
 
@@ -79,8 +90,8 @@ dTimeShadow = rad2deg(nu)/360*P;                                         %Spent 
 %% Results
 fprintf("LTAN: %.4f h \n", LTANd);
 fprintf("Orbital altitude: %.4f km \n", (a_d-a_e)/10^3);
-fprintf("Orbital inclination: %.4f \n", rad2deg(i_d));
-fprintf("RAAN: %.4f deg \n", RAAN_d);
+fprintf("Orbital inclination: %.8f deg \n", rad2deg(i_d));
+fprintf("RAAN: %.8f deg \n", RAAN_d);
 fprintf("Time in shadow: %.4f min \n", dTimeShadow/60);
 
 figure(1) 
