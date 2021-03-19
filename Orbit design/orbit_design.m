@@ -96,8 +96,8 @@ fprintf("Time in shadow: %.4f min \n", dTimeShadow/60);
 
 figure(1) 
 hold on
-plot(a/1000, rad2deg(i), 'b');
-plot(a_d/1000, rad2deg(i_d), 'or'); 
+plot((a-a_e)/1000, rad2deg(i), 'b');
+plot((a_d-a_e)/1000, rad2deg(i_d), 'or'); 
 hold off 
 grid on
 xlabel('Orbital altitude over the geoid (km)'); 
