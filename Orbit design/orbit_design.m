@@ -20,7 +20,7 @@ a_e = 6378.14e3;                                %Mean Earth radius
 SolarYear = 365.242199;                         %Solar year
 tau = (3600*24)*(SolarYear/(1+SolarYear));      %Sidereal day
 Earth_Omega = (2*pi/SolarYear)/(3600*24);       %Earth Mean motion
-Sun_Omega = (2*pi)/tau;                         %Earth rate relative to vernal equinox
+Sun_Omega = (360)/SolarYear;                    %Earth rate relative to vernal equinox
  
 %Time relationships 
 vernalTime = datetime(2022,3,20,0,37,0,0);      %Day of the vernal equinox
@@ -72,7 +72,8 @@ while (error >= tol)
 end
 
 %% RAAN selection
-RAAN_d = mod((360/24)*(LTANd-180+(Sun_Omega)*(time-vernalTime)*(3600*24)),360);
+RAAN_d = (360/24)*(LTANd-180+(Sun_Omega)*(time-vernalTime));
+RAAN_d = mod(RAAN_d, 360);
 
 %% Fundamental interval 
 dL = 360*(rep_days/rev_day);                    %Earth angle between adcent groundtracks
