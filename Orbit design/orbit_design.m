@@ -72,7 +72,7 @@ while (error >= tol)
 end
 
 %% RAAN selection
-RAAN_d = (360/24)*(LTANd-180+(Sun_Omega)*(time-vernalTime));
+RAAN_d = (360/24)*LTANd-180+(Sun_Omega)*(time-vernalTime);
 RAAN_d = mod(RAAN_d, 360);
 
 %% Fundamental interval 
